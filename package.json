@@ -1,0 +1,22 @@
+{
+  "name": "travel-backend",
+  "version": "1.0.0",
+  "description": "Backend for a CLI utility called travel-explorer",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.16.3",
+    "ts-node-dev": "^2.0.0"
+  }
+}
