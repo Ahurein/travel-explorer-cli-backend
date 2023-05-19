@@ -10,10 +10,13 @@ export const getAttractionsByContinentService = async (continent: string, page =
       },
     },
     {
+      $sample: {size: 100000000}
+    },
+    {
       $group: {
         _id: null,
         total: { $sum: 1 },
-        attractions: {$push: "$$ROOT"}
+        attractions: { $push: "$$ROOT" }
       }
     },
     {
@@ -44,11 +47,11 @@ export const getAttractionByCountryService = async (country: string, page = 1) =
         "attraction.country": formattedCountry?.trim(),
       },
     },
-        {
+    {
       $group: {
         _id: null,
         total: { $sum: 1 },
-        attractions: {$push: "$$ROOT"}
+        attractions: { $push: "$$ROOT" }
       }
     },
     {
@@ -106,10 +109,7 @@ export const getOneAttractionPerContinentService = async () => {
 
 
 
-export const getAllAttractionByCityService = async (
-  country: string,
-  city: string
-) => {
+export const getAttractionByCityService = async (country: string, city: string, page = 1) => {
   const formattedCountry = capitalizeWords(country);
   const formattedCity = capitalizeWords(city);
 
@@ -122,6 +122,30 @@ export const getAllAttractionByCityService = async (
         ],
       },
     },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: 1 },
+        attractions: { $push: "$$ROOT" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        attractions: {
+          $slice: ["$attractions", (page - 1) * 10, 10]
+        },
+        total: 1,
+        hasMore: {
+          $cond: {
+            if: { $gt: ["$total", (page * 10)] },
+            then: true,
+            else: false
+          }
+        }
+      }
+    }
+
   ]);
 };
 
@@ -141,9 +165,25 @@ export const getAttractionsNearYouService = async (country: string, page = 1) =>
         attractions: { $push: "$$ROOT" }
       }
     },
+    { $addFields: { randomIndex: { $floor: { $multiply: [{ $size: "$attractions" }, { $rand: {} }] } } } },
+    { $addFields: { randomAttraction: { $arrayElemAt: ["$attractions", "$randomIndex"] } } },
     {
       $project: {
-        _id: 1,
+        city: "_id",
+        total: 1,
+        attraction: "$randomAttraction.attraction"
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        attractions: { $push: "$$ROOT" },
+        total: {$sum: 1}
+      }
+    },
+    {
+      $project: {
+        _id: 0,
         attractions: {
           $slice: ["$attractions", (page - 1) * 10, 10]
         },
@@ -157,12 +197,14 @@ export const getAttractionsNearYouService = async (country: string, page = 1) =>
         }
       }
     }
+
   ])
 };
 
 
-export const getByContinentAndCityService = async (continent: string) => {
+export const getContinentThingsToDoService = async (continent: string, page = 1) => {
   const formattedContinent = capitalizeWords(continent);
+  console.log(page)
   return AttractionModel.aggregate([
     {
       $match: {
@@ -174,36 +216,51 @@ export const getByContinentAndCityService = async (continent: string) => {
     },
     {
       $group: {
-        _id: "$attraction.city",
+        _id: "$attraction.country",
         total: { $sum: 1 },
         attractions: { $first: "$$ROOT" },
       },
     },
     {
-      $project: {
-        city: "$_id",
-        total: 1,
-        continent: "$attractions.continent",
-        country: "$attraction.country",
-        attraction: "$attractions.attraction",
-      },
+      $addFields: {total: "$$ROOT.total"},
     },
+    
     {
-      $limit: 30,
+      $addFields: {attraction: "$$ROOT.attractions.attraction"},
     },
     {
       $project: {
-        continent: "$continent.name",
-        country: 1,
-        city: 1,
-        attraction: 1,
-        total: 1,
-      },
+        attractions: 0
+      }
     },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: 1 },
+        attractions: {$push: "$$ROOT"}
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        attractions: {
+          $slice: ["$attractions", (page - 1) * 10, 10]
+        },
+        total: 1,
+        hasMore: {
+          $cond: {
+            if: { $gt: ["$total", (page * 10)] },
+            then: true,
+            else: false
+          }
+        }
+      }
+    }
+
   ]);
 };
 
-export const getCountryThingsToDoService = async (country: string) => {
+export const getCountryThingsToDoService = async (country: string, page = 1) => {
   const formattedCountry = capitalizeWords(country);
   return AttractionModel.aggregate([
     {
@@ -222,26 +279,40 @@ export const getCountryThingsToDoService = async (country: string) => {
       },
     },
     {
-      $project: {
-        city: "$_id",
-        total: 1,
-        continent: "$attractions.continent",
-        country: "$attraction.country",
-        attraction: "$attractions.attraction",
-      },
+      $addFields: { total: "$$ROOT.total" },
     },
+
     {
-      $limit: 30,
+      $addFields: { attraction: "$$ROOT.attractions.attraction" },
     },
     {
       $project: {
-        continent: "$continent.name",
-        country: 1,
-        city: 1,
-        attraction: 1,
-        total: 1,
-      },
+        attractions: 0
+      }
     },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: 1 },
+        attractions: { $push: "$$ROOT" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        attractions: {
+          $slice: ["$attractions", (page - 1) * 10, 10]
+        },
+        total: 1,
+        hasMore: {
+          $cond: {
+            if: { $gt: ["$total", (page * 10)] },
+            then: true,
+            else: false
+          }
+        }
+      }
+    }
   ]);
 };
 
