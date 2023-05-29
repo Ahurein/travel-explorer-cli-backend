@@ -204,7 +204,6 @@ export const getAttractionsNearYouService = async (country: string, page = 1) =>
 
 export const getContinentThingsToDoService = async (continent: string, page = 1) => {
   const formattedContinent = capitalizeWords(continent);
-  console.log(page)
   return AttractionModel.aggregate([
     {
       $match: {
@@ -311,6 +310,25 @@ export const getCountryThingsToDoService = async (country: string, page = 1) => 
             else: false
           }
         }
+      }
+    }
+  ]);
+};
+
+export const getAttractionsStatsService = async () => {
+  return AttractionModel.aggregate([
+    {
+      $group: {
+        _id: "$continent",
+        total: { $sum: 1 },
+        // attractions: { $push: "$$ROOT" }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        continent: "$_id",
+        total: 1
       }
     }
   ]);

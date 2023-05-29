@@ -9,7 +9,7 @@ const app: Application = express()
 //configuration
 const limiter = rateLimit({
     windowMs: 7200000,
-    max: 2,
+    max: 30,
     standardHeaders: true,
     legacyHeaders: false,
     message: "You have exceeded your request limit, Please wait for a while"
