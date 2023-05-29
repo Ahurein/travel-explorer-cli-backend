@@ -32,7 +32,7 @@ app.use("*", (req: Request, res: Response)=> {
 
 
 app.listen(5000, ()=>{
-    mongoose.connect(process.env.DBURI!)
+    mongoose.connect(process.env.DB_URI!)
     mongoose.connection.on('connected', ()=> console.log("DB connected"))
     console.log('Application running on port 5000')
 })
