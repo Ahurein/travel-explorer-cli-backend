@@ -1,0 +1,4 @@
+runtime: nodejs14
+entrypoint: node lib/index.js
+env_variables:
+  DB_URI: mongodb+srv://holycity:holyc1ty@cluster0.ck7le2s.mongodb.net/tourist_guide?retryWrites=true&w=majority
