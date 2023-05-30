@@ -5,6 +5,7 @@ import { attractionRoutes } from "./routes/attractions.route";
 import rateLimit from 'express-rate-limit'
 
 const app: Application = express()
+const port = process.env.PORT || 3000
 
 //configuration
 const limiter = rateLimit({
@@ -31,8 +32,8 @@ app.use("*", (req: Request, res: Response)=> {
 })
 
 
-app.listen(5000, ()=>{
+app.listen(port, ()=>{
     mongoose.connect(process.env.DB_URI!)
     mongoose.connection.on('connected', ()=> console.log("DB connected"))
-    console.log('Application running on port 5000')
+    console.log('Application running on port 3000')
 })
